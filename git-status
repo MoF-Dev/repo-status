@@ -1,0 +1,28 @@
+#!/bin/zsh
+
+NO_COLOR='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+WHITE='\033[1;37m'
+DIR=""
+#hubrepos=( $(python motd.py) )
+hubrepos=( $(cat ./remote))
+localrepos=($(find ${DIR} -name .git -type d -exec dirname {} \;))
+
+for name in "${hubrepos[@]}"
+do
+    for fullpath in "${localrepos[@]}"
+    do
+        less=$(echo "$fullpath" | grep -oE '[^/]+$')
+        if [ "$name" = "$less" ]
+        then
+            out=$(git --git-dir="$fullpath"/.git --work-tree="$fullpath" status | grep -o "nothing to commit")
+            if [ "$out" = "nothing to commit" ]
+            then
+                echo -e "${NO_COLOR}Repository: ${WHITE}$name${NO_COLOR} ${GREEN}has nothing to commit.${NO_COLOR}"
+            else
+                echo -e "${NO_COLOR}Repository: ${WHITE}$name${NO_COLOR} ${RED}needs commiting.${NO_COLOR}"
+            fi
+        fi 
+    done
+done
